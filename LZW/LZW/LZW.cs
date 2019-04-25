@@ -18,13 +18,12 @@ namespace task_LZW
 		    for (int i = 0; i < data.Length; i++)
 		    {
 		        pool.Add(data[i]);
-		        var poolArray = pool.ToArray();
-                if (codingTable.ContainsKey(poolArray) && i != data.Length - 1)
+                if (codingTable.ContainsKey(pool) && i != data.Length - 1)
                     continue;
 		        
-		        codingTable[poolArray] = codingIndex++;
+		        codingTable[pool] = codingIndex++;
 		        pool = new List<byte> {data[i]};
-                result.Add(codingTable[poolArray]);
+                result.Add(codingTable[pool]);
 		    }
 
 		    return result.ToArray();
@@ -43,16 +42,14 @@ namespace task_LZW
                 if (codingTable.ContainsKey(currentCode))
                 {
                     var entry = codingTable[currentCode];
-                    codingTable[codingIndex++] = 
-                        AddElelementToArray(codingTable[previousCode], entry[0]);
+                    codingTable[codingIndex++] = new List<byte>(codingTable[previousCode]) {entry[0]};
                     previousCode = currentCode;
                 }
 
                 else
                 {
                     var kek = codingTable[previousCode];
-                    var entry = AddElelementToArray(kek, kek[0]);
-                    codingTable[codingIndex++] = entry;
+                    codingTable[codingIndex++] = new List<byte>(kek) { kek[0] }; ;
                     previousCode = codingIndex;
                 }
             }
@@ -97,27 +94,20 @@ namespace task_LZW
 			return LZWtoData(lzw.ToArray());
 		}
 
-	    private static Dictionary<byte[], int> GetInitialEncodingTable(int dimension)
+	    private static Dictionary<List<byte>, int> GetInitialEncodingTable(int dimension)
 	    {
-	        var table = new Dictionary<byte[], int>(new MyEqualityComparer());
+	        var table = new Dictionary<List<byte>, int>(new MyEqualityComparer());
 	        for (int i = 0; i < dimension; i++)
-	            table[new[] { (byte)i }] = i;
+	            table[new List<byte> { (byte)i }] = i;
 	        return table;
 	    }
 
-	    private static Dictionary<int, byte[]> GetInitialDecodingTable(int dimension)
+	    private static Dictionary<int, List<byte>> GetInitialDecodingTable(int dimension)
 	    {
-	        var table = new Dictionary<int, byte[]>();
+	        var table = new Dictionary<int, List<byte>>();
 	        for (int i = 0; i < dimension; i++)
-	            table[i] = new[] { (byte)i };
+	            table[i] = new List<byte> { (byte)i };
 	        return table;
-	    }
-
-	    private static byte[] AddElelementToArray(byte[] array, byte element)
-	    {
-	        var result = array.ToList();
-            result.Add(element);
-	        return result.ToArray();
 	    }
     }
 }

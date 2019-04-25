@@ -2,15 +2,15 @@
 
 namespace LZW
 {
-    public class MyEqualityComparer : IEqualityComparer<byte[]>
+    public class MyEqualityComparer : IEqualityComparer<List<byte>>
     {
-        public bool Equals(byte[] x, byte[] y)
+        public bool Equals(List<byte> x, List<byte> y)
         {
-            if (x.Length != y.Length)
+            if (x.Count != y.Count)
             {
                 return false;
             }
-            for (int i = 0; i < x.Length; i++)
+            for (int i = 0; i < x.Count; i++)
             {
                 if (x[i] != y[i])
                 {
@@ -20,10 +20,10 @@ namespace LZW
             return true;
         }
 
-        public int GetHashCode(byte[] obj)
+        public int GetHashCode(List<byte> obj)
         {
             int result = 17;
-            for (int i = 0; i < obj.Length; i++)
+            for (int i = 0; i < obj.Count; i++)
             {
                 unchecked
                 {
