@@ -16,25 +16,24 @@ namespace Match2d
                 throw new ArgumentException();
             int p = pattern.Count, q = pattern[0].Count;
             int m = matrix.Count, n = matrix[0].Count;
-            var idxMatrix = new int[m][];
+            var idMatrix = new int[m][];
 
-            var ahoCorasick = new AhoCorasick<TChar>(pattern);
+            var trie = new AhoCorasick<TChar>(pattern);
 
-            for (var rowNum = 0; rowNum < m; rowNum++)
+            for (var row = 0; row < m; row++)
             {
-                idxMatrix[rowNum] = new int[n];
-                var num = rowNum;
-                ahoCorasick.ReportOccurrencesIds(matrix[rowNum], (endPos, id) => idxMatrix[num][endPos] = id);
+                idMatrix[row] = new int[n];
+                var num = row;
+                trie.ReportOccurrencesIds(matrix[row], (endPosition, id) => idMatrix[num][endPosition] = id);
             }
 
             var result = new List<Tuple<int, int>>();
-            var smallAhoCorasick = new AhoCorasick<int>(new[] { ahoCorasick.Pattern });
+            var smallAhoCorasick = new AhoCorasick<int>(new[] { trie.Pattern });
             for (var columnNum = 0; columnNum < n; columnNum++)
             {
-                var num = columnNum;
-                var column = idxMatrix.Select(row => row[num]);
+                var column = idMatrix.Select(row => row[columnNum]);
                 smallAhoCorasick.ReportOccurrencesIds(column,
-                    (endPos, id) => result.Add(new Tuple<int, int>(endPos - p + 1, num - q + 1)));
+                    (endPos, id) => result.Add(new Tuple<int, int>(endPos - p + 1, columnNum - q + 1)));
             }
 
             return result;

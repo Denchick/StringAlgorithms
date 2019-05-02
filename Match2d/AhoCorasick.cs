@@ -51,22 +51,20 @@ namespace Match2d
 
     public class AhoCorasick<TChar> where TChar : IComparable<TChar>
     {
-        public readonly List<int> Pattern = new List<int>();
-
-        public delegate void ReportAction(int endPosition, int id);
-
         public readonly Node<TChar> Root;
+        public readonly List<int> Pattern = new List<int>();
+        public delegate void ReportAction(int endPosition, int id);
 
         public void ReportOccurrencesIds(IEnumerable<TChar> input, ReportAction report)
         {
-            var idx = 0;
-            var currentNode = Root;
-            foreach (var letter in input)
+            var id = 0;
+            var node = Root;
+            foreach (var c in input)
             {
-                currentNode = currentNode.GetNext(letter);
-                if (currentNode.Mark)
-                    report(idx, currentNode.StringId);
-                idx++;
+                node = node.GetNext(c);
+                if (node.Mark)
+                    report(id, node.StringId);
+                id++;
             }
         }
 
@@ -75,19 +73,20 @@ namespace Match2d
             Root = new Node<TChar>(null, default(TChar));
             var stringId = 1;
             foreach (var pattern in strings)
-                FillTrie(Root, pattern, ref stringId);
+                Add(pattern, ref stringId);
         }
 
-        private void FillTrie(Node<TChar> node, IEnumerable<TChar> pattern, ref int stringId)
+        private void Add(IEnumerable<TChar> pattern, ref int stringId)
         {
-            foreach (var letter in pattern)
+            var node = Root;
+            foreach (var c in pattern)
             {
-                if (node.Children.TryGetValue(letter, out var nextNode))
+                if (node.Children.TryGetValue(c, out var nextNode))
                     node = nextNode;
                 else
                 {
-                    nextNode = new Node<TChar>(node, letter);
-                    node.Children.Add(letter, nextNode);
+                    nextNode = new Node<TChar>(node, c);
+                    node.Children.Add(c, nextNode);
                     node = nextNode;
                 }
             }
