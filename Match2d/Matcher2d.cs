@@ -6,7 +6,7 @@ namespace Match2d
 {
 	class Matcher2d
 	{
-		        public static List<Tuple<int, int>> PatternMatches<TChar>(
+		public static List<Tuple<int, int>> PatternMatches<TChar>(
             IList<IList<TChar>> pattern, IList<IList<TChar>> matrix)
             where TChar : IComparable<TChar>
         {
@@ -16,27 +16,29 @@ namespace Match2d
                 throw new ArgumentException();
             int p = pattern.Count, q = pattern[0].Count;
             int m = matrix.Count, n = matrix[0].Count;
+            var result = new List<Tuple<int, int>>();
 
+            // матрица вхождений
             var idMatrix = new int[m][];
-            var trie = new AhoCorasick<TChar>(pattern);
+            var ahoCorasick = new AhoCorasick<TChar>(pattern);
             for (var row = 0; row < m; row++)
             {
                 idMatrix[row] = new int[n];
-                var _row = row;
-                trie.ReportOccurrencesIds(
-                    matrix[_row],
-                    (endPosition, id) => idMatrix[_row][endPosition] = id
+                var rowCopy = row;
+                ahoCorasick.ReportOccurrencesIds(
+                    matrix[rowCopy],
+                    (endPosition, id) => idMatrix[rowCopy][endPosition] = id
                 );
             }
 
-            var result = new List<Tuple<int, int>>();
-            var smallAhoCorasick = new AhoCorasick<int>(new[] { trie.Pattern });
+            //По матрице вхождений теперь ищем вхождения
+            var ahoCorasickForAnswer = new AhoCorasick<int>(new[] { ahoCorasick.Pattern });
             for (var column = 0; column < n; column++)
             {
-                var _column = column;
-                smallAhoCorasick.ReportOccurrencesIds(
-                    idMatrix.Select(row => row[_column]),
-                    (endPosition, id) => result.Add(new Tuple<int, int>(endPosition - p + 1, _column - q + 1))
+                var columnCopy = column;
+                ahoCorasickForAnswer.ReportOccurrencesIds(
+                    idMatrix.Select(row => row[columnCopy]),
+                    (endPosition, id) => result.Add(Tuple.Create(endPosition - p + 1, columnCopy - q + 1))
                 );
             }
 
