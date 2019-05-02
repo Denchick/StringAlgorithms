@@ -29,8 +29,6 @@ namespace task_LZW
 		            table[poolNextChar] = index++;
 		            pool = new List<byte> {nextChar};
 		        }
-                    
-		        //result.Add(table[pool]);
 		    }
 
             if (pool.Count > 0)
@@ -41,29 +39,22 @@ namespace task_LZW
 		
 		private static byte[] LZWtoData(int[] lzw)
 		{
-		    var codingTable = GetInitialDecodingTable(Dimension);
-		    var codingIndex = Dimension;
-		    var previousCode = lzw[0];
-		    var result = codingTable[previousCode].ToList();
-            for (int i = 1; i < lzw.Length; i++)
-            {
-                // k == currentCode, w = previousCode
-                var currentCode = lzw[i];
-                if (codingTable.ContainsKey(currentCode))
-                {
-                    var entry = codingTable[currentCode];
-                    codingTable[codingIndex++] = new List<byte>(codingTable[previousCode]) {entry[0]};
-                    previousCode = currentCode;
-                }
+		    var table = GetInitialDecodingTable(Dimension);
+		    var index = Dimension;
 
-                else
-                {
-                    var kek = codingTable[previousCode];
-                    codingTable[codingIndex++] = new List<byte>(kek) { kek[0] }; ;
-                    previousCode = codingIndex;
-                }
-            }
-
+		    var previousCode = table[lzw[0]];
+		    var result = previousCode.ToList();
+		    foreach (var currentCode in lzw.Skip(1))
+		    {
+		        var entry = new List<byte>();
+		        if (table.ContainsKey(currentCode))
+		            entry = table[currentCode];
+		        else if (currentCode == table.Count)
+		            entry = new List<byte>(previousCode) {previousCode[0]};
+                result.AddRange(entry);
+                table[index++] = new List<byte>(previousCode) {entry[0]};
+		        previousCode = entry;
+		    }
 
 		    return result.ToArray();
 		}
