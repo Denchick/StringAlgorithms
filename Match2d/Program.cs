@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace task_Match2d
+namespace Match2d
 {
 	class Program
 	{
