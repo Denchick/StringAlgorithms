@@ -11,20 +11,30 @@ namespace task_LZW
 
 		private static int[] DataToLZW(byte[] data)
 		{
+            if (data.Length == 0)
+                return new int[] {};
+
 		    var result = new List<int>();
-            var codingTable = GetInitialEncodingTable(Dimension);
-		    var codingIndex = Dimension;
-            var pool = new List<byte>(); // сюда читаем новые символы, которых еще нет в словаре
-		    for (int i = 0; i < data.Length; i++)
+            var table = GetInitialEncodingTable(Dimension);
+		    var index = Dimension;
+            var pool = new List<byte> {data[0]}; // сюда читаем новые символы, которых еще нет в словаре
+		    foreach (var nextChar in data.Skip(1))
 		    {
-		        pool.Add(data[i]);
-                if (codingTable.ContainsKey(pool) && i != data.Length - 1)
-                    continue;
-		        
-		        codingTable[pool] = codingIndex++;
-		        pool = new List<byte> {data[i]};
-                result.Add(codingTable[pool]);
+		        var poolNextChar = new List<byte>(pool) { nextChar };
+		        if (table.ContainsKey(poolNextChar))
+		            pool = new List<byte>(poolNextChar);
+		        else
+		        {
+		            result.Add(table[pool]);
+		            table[poolNextChar] = index++;
+		            pool = new List<byte> {nextChar};
+		        }
+                    
+		        //result.Add(table[pool]);
 		    }
+
+            if (pool.Count > 0)
+                result.Add(table[pool]);
 
 		    return result.ToArray();
 		}
