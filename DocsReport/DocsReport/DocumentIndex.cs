@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace DocsReport
@@ -26,22 +25,21 @@ namespace DocsReport
 
     class DocumentIndex
 	{
-		private SuffixTree<int> tree;
-		private List<int> input;
+		private readonly SuffixTree<int> _tree;
 	    private readonly List<DocumentInfo> _docsMapping;
 
         public DocumentIndex(IReadOnlyList<KeyValuePair<string, byte[]>> documents)
 		{
-			var intCast = documents.Select(d => d.Value.Select(x => (int)x)).ToList();
+		    var intCast = documents.Select(d => d.Value.Select(x => (int)x)).ToList();
 			var inputAlphabet = Enumerable.Range(0, 256 + intCast.Count);
-			input = intCast.SelectMany((d, i) => d.Concat(new[] { 256 + i })).ToList();
-			tree = new SuffixTree<int>(input, inputAlphabet);
+			var input = intCast.SelectMany((d, i) => d.Concat(new[] { 256 + i })).ToList();
+			_tree = new SuffixTree<int>(input, inputAlphabet);
 		    _docsMapping = BuildDocsMapping(documents);
         }
 
         public List<DocumentOccurrences> ReportOccurrences(byte[] pattern)
 		{
-		    var occurrences = tree.FindAllOccurrences(pattern.Select(c => (int) c).ToArray());
+		    var occurrences = _tree.FindAllOccurrences(pattern.Select(c => (int) c).ToArray());
 		    return MapInsideDocuments(occurrences);
 		}
 

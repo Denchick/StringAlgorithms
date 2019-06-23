@@ -8,7 +8,6 @@ namespace DocsReport
     public class Tests
     {
         [Test]
-        [TestCase("почему же у меня не выходит нихуя?", "абсолютно нихуя.", "")]
         [TestCase("abcabb0", "ca", "2")]
         [TestCase("c", "c", "0")]
         [TestCase("abcd", "abcd", "0")]

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace DocsReport
 {
@@ -20,21 +19,17 @@ namespace DocsReport
 				Next = new SortedDictionary<TChar, Node>();
 				Plink = new SortedDictionary<TChar, Node>();
 			}
-
-            public  IReadOnlyList<TChar> input { get; set; }
-
-		    public TChar symbol => input[Pos - Len];
 		}
 
-		public Node Root { get; private set; }
+		public Node Root { get; }
 		private Node fake;
 	    private IReadOnlyList<TChar> input;
 
 	    public SuffixTree(IReadOnlyList<TChar> input, IEnumerable<TChar> inputAlphabet)
 		{
 		    this.input = input;
-			fake = new Node { Mark = false, input = input};
-			Root = new Node { Par = fake, Pos = 0, Len = 1, Mark = true, input = input}; // было len=1
+			fake = new Node { Mark = false };
+			Root = new Node { Par = fake, Pos = 0, Len = 1, Mark = true };
 			foreach (var c in inputAlphabet)
 				fake.Next[c] = fake.Plink[c] = Root;
 			var last = Root;
@@ -52,7 +47,7 @@ namespace DocsReport
 		{
 			int i = input.Count;
 			Node parse, split, splitChild;
-			Node newNode = new Node { Mark = false, input = input};
+			Node newNode = new Node { Mark = false };
 			for (parse = last; !parse.Plink.TryGetValue(c, out split); parse = parse.Par)
 				i -= parse.Len;
 			if (split.Next.TryGetValue(input[i], out splitChild))
@@ -69,7 +64,7 @@ namespace DocsReport
 				Attach(newNode, split, newNode.Pos - splitEdgeStart, input[splitEdgeStart]);
 				Attach(splitChild, newNode, splitChild.Pos - newNode.Pos, input[newNode.Pos]);
 				split = newNode;
-				newNode = new Node() {input = input};
+				newNode = new Node();
 			}
 			last.Plink[c] = newNode;
 			Attach(newNode, split, input.Count - i, input[i]);
